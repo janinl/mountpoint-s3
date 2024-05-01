@@ -113,6 +113,7 @@ where
                 lookup.inode.parent(),
                 pid,
                 fs.config.allow_overwrite,
+                fs.config.disable_flush,
                 is_truncate,
             )
             .await
@@ -353,6 +354,8 @@ pub struct S3FilesystemConfig {
     pub allow_delete: bool,
     /// Allow overwrite
     pub allow_overwrite: bool,
+    /// Disable flush
+    pub disable_flush: bool,
     /// Storage class to be used for new object uploads
     pub storage_class: Option<String>,
     /// S3 personality (for different S3 semantics)
@@ -377,6 +380,7 @@ impl Default for S3FilesystemConfig {
             file_mode: 0o644,
             allow_delete: false,
             allow_overwrite: false,
+            disable_flush: false,
             storage_class: None,
             s3_personality: S3Personality::default(),
             server_side_encryption: Default::default(),
@@ -1178,8 +1182,14 @@ where
         match &mut *state {
             FileHandleState::Read { .. } => Ok(()),
             FileHandleState::Write(request) => {
-                self.complete_upload(request, &file_handle.full_key, true, Some(pid))
-                    .await
+                if self.config.disable_flush {
+                    trace!("fs:flush disabled with ino {:?} fh {:?}", _ino, fh);
+                    Ok(())
+                }
+                else {
+                   self.complete_upload(request, &file_handle.full_key, true, Some(pid))
+                        .await
+                }
             }
         }
     }

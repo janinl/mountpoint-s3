@@ -299,11 +299,12 @@ impl Superblock {
         parent_ino: InodeNo,
         pid: u32,
         allow_overwrite: bool,
+        disable_flush: bool,
         is_truncate: bool,
     ) -> WriteHandle {
         trace!(?ino, parent=?parent_ino, "write");
 
-        WriteHandle::new(self.inner.clone(), ino, parent_ino, pid, allow_overwrite, is_truncate)
+        WriteHandle::new(self.inner.clone(), ino, parent_ino, pid, allow_overwrite, disable_flush, is_truncate)
     }
 
     /// Start a readdir stream for the given directory inode
@@ -1094,6 +1095,7 @@ pub struct WriteHandle {
     parent_ino: InodeNo,
     pid: u32,
     allow_overwrite: bool,
+    disable_flush: bool,
     is_truncate: bool,
 }
 
@@ -1105,6 +1107,7 @@ impl WriteHandle {
         parent_ino: InodeNo,
         pid: u32,
         allow_overwrite: bool,
+        disable_flush: bool,
         is_truncate: bool,
     ) -> Self {
         Self {
@@ -1113,6 +1116,7 @@ impl WriteHandle {
             parent_ino,
             pid,
             allow_overwrite,
+            disable_flush,
             is_truncate,
         }
     }

@@ -124,6 +124,13 @@ pub struct CliArgs {
     )]
     pub allow_overwrite: bool,
 
+    #[clap(
+        long,
+        help = "Disable flush operation on file system, avoiding the close-after-flush behaviour",
+        help_heading = MOUNT_OPTIONS_HEADER
+    )]
+    pub disable_flush: bool,
+
     #[clap(long, help = "Automatically unmount on exit", help_heading = MOUNT_OPTIONS_HEADER)]
     pub auto_unmount: bool,
 
@@ -674,6 +681,7 @@ where
     filesystem_config.storage_class = args.storage_class;
     filesystem_config.allow_delete = args.allow_delete;
     filesystem_config.allow_overwrite = args.allow_overwrite;
+    filesystem_config.disable_flush = args.disable_flush;
     filesystem_config.s3_personality = s3_personality;
     filesystem_config.server_side_encryption = ServerSideEncryption::new(args.sse, args.sse_kms_key_id);
 
